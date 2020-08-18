@@ -2,8 +2,11 @@ const express       = require("express"),
       app           = express(),
       port          = 3000,
       bodyParser    = require("body-parser"),
-      mongoose      = require('mongoose');
-
+      mongoose      = require('mongoose'),
+      Campground    = require("./models/campground"),
+      Comment       = require("./models/comment"),
+      seedDB        = require("./seeds")
+      
 app.use(bodyParser.urlencoded({extended:true}));
 app.set("view engine","ejs");
 mongoose.connect('mongodb://localhost:27017/campground', {
@@ -12,27 +15,7 @@ mongoose.connect('mongodb://localhost:27017/campground', {
 })
 .then(() => console.log('Connected to DB!'))
 .catch(error => console.log(error.message));
-
-var campgroundSchema = new mongoose.Schema({
-    name : String,
-    image : String,
-    description: String
-});
-var Campground = mongoose.model("Campground", campgroundSchema);
-// Campground.create(
-//     {
-//         name: "sgranite hills",
-//         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSabmC-wYjUAowZxOu6YW_nuUBtnoIHhZ6aaQ&usqp=CAU",
-//         description:"this a hills"    
-//     },
-//     function(err,campground){
-//         if(err){
-//             console.log(err);
-//         }
-//         else{
-//             console.log("Successfully added");
-//         }
-//     });
+seedDB();
 
 app.get("/",(req,res)=>{
     res.render("landing");
@@ -44,7 +27,7 @@ Campground.find({},(err,allCampgrounds)=>{
         console.log(err);
     }
     else {
-        res.render("index",{campgrounds:allCampgrounds});
+        res.render("campgrounds/index",{campgrounds:allCampgrounds});
     }
 });    
 });
@@ -66,25 +49,63 @@ app.post("/campgrounds",(req,res)=>{
             res.redirect("/campgrounds");
         }
     })
-    
-
 })
+//NEW ROUTES
 app.get("/campgrounds/new",(req,res)=>{
-    res.render("new");
+    res.render("campgrounds/new");
 })
 
-//show -- view info about campground
+//show ROUTES-- view info about campground
 app.get("/campgrounds/:id",(req,res)=>{
     //Find the camground with provided id
-    Campground.findById(req.params.id,(err,foundcampground)=>{
+    Campground.findById(req.params.id).populate("comments").exec((err,foundcampground)=>{
         if(err){
             console.log(err);
         }
         else{
-            res.render("show",{campground:foundcampground});
+            res.render("campgrounds/show",{campground:foundcampground});
         }
     })
 })
+//=========================
+//COMMNETS ROUTES
+//==========================
+app.get("/campgrounds/:id/comments/new",(req,res)=>{
+    //find by id
+    Campground.findById(req.params.id,(err,campground)=>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.render("comments/new",{campground:campground});
+        }
+    })
+    
+})
+app.post("/campgrounds/:id/comments",(req,res)=>{
+    //find by id
+    Campground.findById(req.params.id,(err,campground)=>{
+        if(err){
+            console.log(err);
+            res.redirect("/campgrounds");
+        }
+        else{
+        Comment.create(req.body.comment,(err,comment)=>{
+            if(err){
+                console.log(err);
+            }
+            else{
+                campground.comments.push(comment);
+                campground.save();
+                res.redirect("/campgrounds/" + campground._id);
+            }
+        })
+        }
+    })
+    
+})
+
+
 
 app.listen(port,()=>{
     console.log("app running");
