@@ -1,0 +1,9 @@
+.card img{
+    width: 100%;
+}
+.card {
+    padding: 0;
+}
+.card .figure-caption{
+    padding: 9px;
+}
