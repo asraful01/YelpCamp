@@ -34,6 +34,11 @@ router.post("/campgrounds/:id/comments",isLoggedIn,(req,res)=>{
                 console.log(err);
             }
             else{
+                //add username and id to comment
+                comment.author.id= req.user._id;
+                comment.author.username= req.user.username;
+                //save comment
+                comment.save()
                 campground.comments.push(comment);
                 campground.save();
                 res.redirect("/campgrounds/" + campground._id);
@@ -43,6 +48,42 @@ router.post("/campgrounds/:id/comments",isLoggedIn,(req,res)=>{
     })
     
 })
+//COMMENT EDIT 
+router.get("/campgrounds/:id/comments/:comment_id/edit",(req,res)=>{
+    Comment.findById(req.params.comment_id,(err,foundComment)=>{
+        if(err){
+            res.redirect("back");
+        }
+        else{
+            res.render("comments/edit",{campground_id:req.params.id,comment:foundComment});
+        }
+    })
+    
+})
+//COMMENTS UPDATE
+router.put("/campgrounds/:id/comments/:comment_id",(req,res)=>{
+    Comment.findByIdAndUpdate(req.params.comment_id,req.body.comment,(err,updatedComment)=>{
+    if(err){
+        res.redirect("back");
+    }
+    else{
+        res.redirect("/campgrounds/"+req.params.id);
+    }
+})
+});
+//COMMENT DESTROY
+router.delete("/campgrounds/:id/comments/:comment_id",(req,res)=>{
+    Comment.findByIdAndRemove(req.params.comment_id,(err)=>{
+        if(err){
+            res.redirect("back");
+        }
+        else{
+            res.redirect("/campgrounds/"+req.params.id);
+        }
+    });
+    
+})
+
 function isLoggedIn(req,res,next){
     if(req.isAuthenticated()){
         return next();

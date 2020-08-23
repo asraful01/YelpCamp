@@ -7,3 +7,6 @@
 .card .figure-caption{
     padding: 9px;
 }
+#delete_form{
+    display: inline;
+}

@@ -5,6 +5,7 @@ const express           = require("express"),
       mongoose          = require('mongoose'),
       passport          = require("passport"),
       LocalStrategy     = require ("passport-local"),
+      methodOverride    = require("method-override"),
       Campground        = require("./models/campground"),
       Comment           = require("./models/comment"),
       User              = require("./models/user"),
@@ -18,6 +19,7 @@ const commentRoutes     = require("./routes/comments"),
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static(__dirname+"/public"));
 app.set("view engine","ejs");
+app.use(methodOverride("_method"));
 //===========================================
 //=======================
 //Mongoose connection
@@ -28,7 +30,8 @@ mongoose.connect('mongodb://localhost:27017/campground', {
 })
 .then(() => console.log('Connected to DB!'))
 .catch(error => console.log(error.message));
-seedDB();
+
+// seedDB(); //seed Database
 //====================================
 //===========================================
 //PASSPORT CONFIG
