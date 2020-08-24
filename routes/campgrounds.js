@@ -20,6 +20,7 @@ router.post("/campgrounds",middleware.isLoggedIn,(req,res)=>{
         //get data from from and add to campgrounds
 
         var name    = req.body.name;
+        var price   = req.body.price;
         var image   = req.body.image;
         var des     = req.body.description;
         var author  =
@@ -27,7 +28,7 @@ router.post("/campgrounds",middleware.isLoggedIn,(req,res)=>{
             id: req.user._id,
             username:req.user.username
         }
-    var newcamp= {name:name, image:image,description:des,author:author}
+    var newcamp= {name:name, image:image,price:price,description:des,author:author}
         //create new camground and save to DB
         Campground.create(newcamp,(err, newlyadded)=>{
             if(err){
