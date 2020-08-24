@@ -26,6 +26,7 @@ router.post("/campgrounds/:id/comments",middleware.isLoggedIn,(req,res)=>{
     //find by id
     Campground.findById(req.params.id,(err,campground)=>{
         if(err){
+            req.flash("error","Something went wrong");
             console.log(err);
             res.redirect("/campgrounds");
         }
@@ -41,7 +42,7 @@ router.post("/campgrounds/:id/comments",middleware.isLoggedIn,(req,res)=>{
                 //save comment
                 comment.save()
                 campground.comments.push(comment);
-                campground.save();
+                req.flash("success","Successfully comment added");
                 res.redirect("/campgrounds/" + campground._id);
             }
         })
@@ -49,7 +50,9 @@ router.post("/campgrounds/:id/comments",middleware.isLoggedIn,(req,res)=>{
     })
     
 })
-//COMMENT EDIT 
+//=========================
+//COMMNETS EDIT
+//==========================
 router.get("/campgrounds/:id/comments/:comment_id/edit",middleware.checkCommentOwnership,(req,res)=>{
     Comment.findById(req.params.comment_id,(err,foundComment)=>{
         if(err){
@@ -61,7 +64,9 @@ router.get("/campgrounds/:id/comments/:comment_id/edit",middleware.checkCommentO
     })
     
 })
-//COMMENTS UPDATE
+//=========================
+//COMMNETS UPDATE
+//==========================
 router.put("/campgrounds/:id/comments/:comment_id",middleware.checkCommentOwnership,(req,res)=>{
     Comment.findByIdAndUpdate(req.params.comment_id,req.body.comment,(err,updatedComment)=>{
     if(err){
@@ -72,13 +77,16 @@ router.put("/campgrounds/:id/comments/:comment_id",middleware.checkCommentOwners
     }
 })
 });
-//COMMENT DESTROY
+//=========================
+//COMMNETS DESTROY
+//==========================
 router.delete("/campgrounds/:id/comments/:comment_id",middleware.checkCommentOwnership,(req,res)=>{
     Comment.findByIdAndRemove(req.params.comment_id,(err)=>{
         if(err){
             res.redirect("back");
         }
         else{
+            req.flash("success","Comment deleted");
             res.redirect("/campgrounds/"+req.params.id);
         }
     });
